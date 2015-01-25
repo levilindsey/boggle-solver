@@ -1,0 +1,36 @@
+{
+  "name": "boggle-solver",
+  "version": "0.0.0",
+  "description": "Given a boggle layout and a dictionary, finds the possible words",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/levisl176/boggle-solver"
+  },
+  "bugs": {
+    "url": "http://github.com/levisl176/boggle-solver/issues",
+    "email": "levi@levi.codes"
+  },
+  "author": {
+    "name": "Levi Lindsey",
+    "email": "levi@levi.codes",
+    "url": "http://levi.codes"
+  },
+  "main": "src/main",
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "./node_modules/.bin/mocha"
+  },
+  "dependencies": {
+    "q": "~1.0.1"
+  },
+  "devDependencies": {
+    "mocha": "~2.0.1",
+    "chai": "~1.9.2",
+    "sinon": "~1.11.1",
+    "sinon-chai": "~2.6.0",
+    "chai-as-promised": "^4.1.1"
+  },
+  "engines": {
+    "node": ">=0.10"
+  }
+}
