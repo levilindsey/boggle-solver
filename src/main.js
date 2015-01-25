@@ -12,26 +12,31 @@ var boardManager = require('./board-manager');
 
 var config = {};
 
-config.debug = false;
+config.printSolution = true;
+config.recordRunTime = false;
+config.printBoard = false;
+config.useRandomBoard = false;
+config.randomBoardSideLength = 100;
 
-// TODO: let these be passed in as command-line arguments
 config.dictionaryPath = './docs/dict.txt';
 config.boardPath = '../docs/board.js';
 
 var dictionary = null;
 var board = null;
 
-// ---  --- //
-
 run();
 
 // ---  --- //
 
+/**
+ * Finds and prints all possible solutions for a game of Boggle.
+ */
 function run() {
-  if (config.debug) {
+  if (config.recordRunTime) {
     console.time('Boggle setup');
 
     setup()
+      .then(printBoard)
       .then(console.timeEnd.bind(console, 'Boggle setup'))
       .then(console.time.bind(console, 'Boggle solution'))
       .then(findAllSolutions)
@@ -46,10 +51,15 @@ function run() {
   }
 }
 
+/**
+ * Reads in the dictionary and the board to use.
+ *
+ * @returns {Q.Promise}
+ */
 function setup() {
   return Q.all([
-    dictionaryManager.readFromFile(config.dictionaryPath),
-    boardManager.readFromFile(config.boardPath)
+    dictionaryManager.load(config.dictionaryPath),
+    boardManager.load(config)
   ])
     .then(function () {
       dictionary = dictionaryManager.getInstance();
@@ -57,8 +67,13 @@ function setup() {
     });
 }
 
+/**
+ * Finds all possible words in the module's board according to the module's dictionary.
+ *
+ * @returns {Trie}
+ */
 function findAllSolutions() {
-  var x, y, trieNode, letter;
+  var x, y;
   var boardSideLength = board.length;
   var visitedCells = initializeVisitedArray(boardSideLength);
   var solutions = new Trie();
@@ -67,71 +82,73 @@ function findAllSolutions() {
   // Find all words starting from each cell on the board
   for (x = 0; x < boardSideLength; x += 1) {
     for (y = 0; y < boardSideLength; y += 1) {
-      // Get the letter at the current cell on the board
-      letter = board[x][y];
-
-      // Get the child trie node for the current letter
-      trieNode = dictionary.root[letter];
-
-      // Does the current letter represent a valid prefix/word from the dictionary?
-      if (trieNode) {
-        currentLetters.push(letter);
-
-        // Does the current trie node represent a complete word from the dictionary?
-        if (trieNode.end) {
-          solutions.addWord(currentLetters);
-        }
-
-        // Continue traversing from the current cell on the board
-        traverseBoard(x, y, trieNode, currentLetters, visitedCells, solutions, boardSideLength);
-
-        currentLetters.pop();
-      }
+      exploreCell(x, y, dictionary.root, currentLetters, visitedCells, solutions);
     }
   }
 
   return solutions;
 }
 
-function traverseBoard(x, y, trieNode, currentLetters, visitedCells, solutions, boardSideLength) {
-  var nx, ny, nxMax, nyMax, letter, neighborNode;
+/**
+ * Performs a depth-first traversal of the boggle board continuing at the cell at the given coordinates. Each letter
+ * and cell is checked for valid word formations (according to the dictionary) and valid cell usage (so the same cell
+ * is not visited twice within one path).
+ *
+ * @param {Number} x
+ * @param {Number} y
+ * @param {TrieNode} parentNode
+ * @param {Array.<String>} currentLetters
+ * @param {Array.<Array.<Boolean>>} visitedCells
+ * @param {Trie} solutions
+ */
+function exploreCell(x, y, parentNode, currentLetters, visitedCells, solutions) {
+  var letter, trieNode, nx, ny, nxMax, nyMax;
 
-  // Mark the current cell as visited
-  visitedCells[x][y] = true;
+  // Has the current cell already been used in the current path?
+  if (!visitedCells[x][y]) {
+    // Get the letter at the current cell on the board
+    letter = board[x][y];
 
-  // Try to traverse across each of the neighbors of the current cell
-  for (nx = x - 1, nxMax = x + 1; nx <= nxMax; nx += 1) {
-    for (ny = y - 1, nyMax = y + 1; ny <= nyMax; ny += 1) {
-      // Have the current neighbor already been used in the current path?
-      if (!visitedCells[nx][ny]) {
-        // Get the letter at the current cell on the board
-        letter = board[nx][ny];
+    // Get the child trie node for the current letter
+    trieNode = parentNode[letter];
 
-        // Get the child trie node for the current letter
-        neighborNode = trieNode[letter];
+    // Does the current letter represent a valid prefix/word from the dictionary?
+    if (trieNode) {
+      // Mark the current cell as visited
+      visitedCells[x][y] = true;
 
-        // Does the current letter represent a valid prefix/word from the dictionary?
-        if (neighborNode) {
-          currentLetters.push(letter);
+      // Add the current letter to the current prefix/word
+      currentLetters.push(letter);
 
-          // Does the current trie node represent a complete word from the dictionary?
-          if (neighborNode.end) {
-            solutions.addWord(currentLetters);
-          }
+      // Does the current trie node represent a complete word from the dictionary?
+      if (trieNode.end) {
+        solutions.addWord(currentLetters);
+      }
 
-          // Continue traversing from the current neighbor cell
-          traverseBoard(nx, ny, neighborNode, currentLetters, visitedCells, solutions, boardSideLength);
-
-          currentLetters.pop();
+      // Try to traverse across each of the neighbors of the current cell
+      for (nx = x - 1, nxMax = x + 1; nx <= nxMax; nx += 1) {
+        for (ny = y - 1, nyMax = y + 1; ny <= nyMax; ny += 1) {
+          exploreCell(nx, ny, trieNode, currentLetters, visitedCells, solutions);
         }
       }
+
+      // Remove the current letter from the current prefix/word
+      currentLetters.pop();
+
+      // Un-mark the current cell as visited
+      visitedCells[x][y] = false;
     }
   }
-
-  // Un-mark the current cell as visited
-  visitedCells[x][y] = false;
 }
 
+/**
+ * Create a 2D array that will be used to keep track of whether each cell of the board has been visited. Importantly,
+ * this 2D array will have an "edge" around the bounds of the actual board. This edge simplifies the process of
+ * performing bounds checks when iterating through the cells of the board.
+ *
+ * @param {Number} rowCount
+ * @returns {Array.<Boolean|undefined>}
+ */
 function initializeVisitedArray(rowCount) {
   var i;
   var array = [];
@@ -158,5 +175,21 @@ function initializeVisitedArray(rowCount) {
  * @param {Trie} solutions
  */
 function printSolutions(solutions) {
-  solutions.printAllWords();
+  if (config.printSolution) {
+    solutions.printAllWords();
+  }
+}
+
+/**
+ * Prints the module's board.
+ */
+function printBoard() {
+  var i;
+  var boardSideLength = board.length;
+
+  if (config.printBoard) {
+    for (i = 0; i < boardSideLength; i += 1) {
+      console.info(board[i].join(' '));
+    }
+  }
 }

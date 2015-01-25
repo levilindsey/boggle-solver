@@ -28,7 +28,6 @@ function Trie() {
   this.root = null;
   this.clear = clear;
   this.addWord = addWord;
-  this.containsWord = containsWord;
   this.toString = toString;
   this.printAllWords = printAllWords;
 
@@ -68,26 +67,6 @@ function addWord(word) {
 }
 
 /**
- * Returns true if this Trie contains the given word.
- *
- * @this Trie
- * @param {String} word
- */
-function containsWord(word) {
-  for (var node = this.root, i = 0, count = word.length;
-       i < count;
-       i += 1) {
-    node = node[word[i]];
-
-    if (!node) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
  * Returns a string representation of this Trie.
  *
  * @this Trie
@@ -117,6 +96,7 @@ function printAllWords() {
     node = nodeLetterPair.node;
     letters = nodeLetterPair.letters;
 
+    // We need to iterate over the keys in order
     keys = Object.keys(node).sort(trieKeyComparator);
 
     for (i = 0, count = keys.length; i < count; i += 1) {

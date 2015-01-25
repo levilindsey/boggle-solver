@@ -22,7 +22,7 @@ var Trie = require('./trie');
 var dictionaryManager = {};
 var instance = null;
 
-dictionaryManager.readFromFile = readFromFile;
+dictionaryManager.load = load;
 dictionaryManager.getInstance = getInstance;
 
 module.exports = dictionaryManager;
@@ -32,6 +32,9 @@ module.exports = dictionaryManager;
 /**
  * Reads in the raw dictionary data from the given file.
  *
+ * This uses a read stream and the readline library in order to more efficiently read the input file line-by-line
+ * rather than forcing the entire file string into memory simultaneously.
+ *
  * NOTE: This requires the file text to contain a trailing newline character.
  * NOTE: This works in a case-insensitive manner. If we can assume all input will have uniform case, then this can be
  *       optimized by removing the call to toUpperCase.
@@ -39,7 +42,7 @@ module.exports = dictionaryManager;
  * @param {String} path
  * @returns {Q.promise}
  */
-function readFromFile(path) {
+function load(path) {
   var deferred = Q.defer();
 
   instance = new Trie();

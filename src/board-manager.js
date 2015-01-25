@@ -15,7 +15,7 @@
 var boardManager = {};
 var instance = null;
 
-boardManager.readFromFile = readFromFile;
+boardManager.load = load;
 boardManager.getInstance = getInstance;
 
 module.exports = boardManager;
@@ -25,11 +25,11 @@ module.exports = boardManager;
 /**
  * Reads in the raw board data from the given file.
  *
- * @param {String} path
+ * @param {Object} config
  * @returns {Q.promise|Object}
  */
-function readFromFile(path) {
-  instance = require(path).board;
+function load(config) {
+  instance = config.useRandomBoard ? createRandomBoard(config.randomBoardSideLength) : require(config.boardPath).board;
   return instance;
 }
 
@@ -40,4 +40,28 @@ function readFromFile(path) {
  */
 function getInstance() {
   return instance;
+}
+
+/**
+ * Creates a random Board with the given side length.
+ *
+ * @returns {Board}
+ */
+function createRandomBoard(randomBoardSideLength) {
+  // Duplicates could be added to this alphabet to make some letter frequencies more realistic
+  var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  var x, y, column;
+  var board = [];
+  
+  for (x = 0; x < randomBoardSideLength; x += 1) {
+    column = [];
+    board[x] = column;
+
+    for (y = 0; y < randomBoardSideLength; y += 1) {
+      column[y] = alphabet[parseInt(Math.random() * alphabet.length)];
+    }
+  }
+
+  return board;
 }
