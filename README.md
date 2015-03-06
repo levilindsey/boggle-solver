@@ -4,6 +4,7 @@
 
 _You can also find my complete solution on GitHub at [github.com/levisl176/boggle-solver][github-url]_
 
+_This was completed as a solution to an interview code challenge._
 
 ## Description of my Solution
 
