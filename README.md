@@ -1,8 +1,6 @@
 # boggle-solver
 
-#### Given a boggle layout and a dictionary, finds the possible words
-
-_You can also find my complete solution on GitHub at [github.com/levisl176/boggle-solver][github-url]_
+#### Given a [boggle][boggle-url] layout and a dictionary, finds the possible words
 
 _This was completed as a solution to an interview code challenge._
 
@@ -109,6 +107,5 @@ be run as a one-off script.
 
 
 
-
-[github-url]: https://github.com/levisl176/boggle-solver
+[boggle-url]: http://en.wikipedia.org/wiki/Boggle
 [trie-url]: http://en.wikipedia.org/wiki/Trie
