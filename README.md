@@ -4,6 +4,7 @@
 
 _This was completed as a solution to an interview code challenge._
 
+
 ## Description of my Solution
 
 The general approach I took is to: first store all of the words of dictionary in a [trie][trie-url], then perform a
@@ -27,18 +28,7 @@ More specifically, my algorithm proceeds as follows:
    of the solutions trie (in alphabetical order), and print all of the complete words.
 
 
-## Answers to Questions from the Problem Statement
-
-// QUESTION A: Does your program output match solution_output.txt exactly?  If not, why not?
-
-Yes
-
-
-// Your answer may be more than one file but please indicate HERE how you would run it:
-
-// QUESTION B:  Please note how this solution is to be run.  If you must open a web page, run a set of shell commands,
-run "node index.js", or similar, please indicate that in your answer.  These instructions should be followed by an
-intelligent non-engineer.
+## How to run the program
 
 - From a command line, navigate your working directory to `boggle-solver`
 - Install NPM dependencies: `npm install`
@@ -47,9 +37,7 @@ intelligent non-engineer.
 _See [Getting Set Up][./docs/getting-set-up.md] for more detail._
 
 
-// Additionally, consider the following questions and answer here:
-
-// 1. Would your solution work if we expanded the board to 5x5?  6x6?  At what point do you think it would give out?
+## How this implementation scales
 
 This implementation scales somewhat decently to larger grids. It processes a 1000x1000 grid on my personal machine in
 50 seconds.
@@ -59,8 +47,7 @@ these were to increase, my solution would not gain as much benefit from pruning 
 would consequently show slower run times.
 
 
-// 2. What are some other ways to implement your answer? 3. For each of these, what is the time and space tradeoff for
-running this against another solution?
+## Other possible implementations and time and space tradoffs
 
 When discussing space and time complexities, I will use the following symbols:
 
@@ -98,12 +85,6 @@ Some other possible solutions include:
       structure used to store the dictionary and how it were traversed.
 - I believe there might also exist a solution involving dynamic programming. This could theoretically reduce the
   run-time complexity by a significant amount.
-
-
-// 4. For each of these, is it more suited for a long-running server, or for a one-off script?
-
-I'm not sure I understand the potential context for this question. In general, I would think this boggle solver should
-be run as a one-off script.
 
 
 
